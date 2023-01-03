@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react'
+import html2canvas from 'html2canvas';
 import QRCode from "react-qr-code";
-import { useBatchSelector } from './context';
+import { useBatchSelector, useBatchState } from './context';
 import { IVariable } from './types';
 
 type Props = {}
@@ -32,6 +33,8 @@ function VariableValue({ data, value }: { data: IVariable, value: any }) {
   )
 }
 
+const wait = (t: number) => new Promise((r) => setTimeout(r, t));
+
 function Preview({}: Props) {
   const values = useBatchSelector<Array<any>>((v) => v?.values || []);
   const variables = useBatchSelector<IVariable[]>((v) => v?.variables || []);
@@ -50,6 +53,25 @@ function Preview({}: Props) {
     setIndex(values[newIndex] ? newIndex : 0);
   }
 
+  const { patch } = useBatchState();
+
+  const handleGenerate = async () => {
+    const el = document.getElementById('preview-el');
+    if (!el) return;
+    const output = [];
+
+    setIndex(0);
+    await wait(10);
+
+    for (let i = 0; i < values.length; i += 1) {
+      setIndex(i);
+      await wait(10);
+      const canvas = await html2canvas(el, { allowTaint: false, useCORS: true });
+      output.push(canvas.toDataURL());
+    }
+    patch({ output });
+  }
+
   return (
     <div className="space-y-2">
       <div className="border border-black">
@@ -66,6 +88,11 @@ function Preview({}: Props) {
         <button className="border py-1 border-slate-400 rounded px-3" onClick={handlePrev}>Prev</button>
         <div>{index + 1 } of {values.length}</div>
         <button className="border py-1 border-slate-400 rounded px-3" onClick={handleNext}>Next</button>
+      </div>
+      <div>
+        <button className="bg-slate-500 text-white text-sm whitespace-nowrap px-4 w-full py-3" type="button" onClick={handleGenerate}>
+          Generate
+        </button>
       </div>
     </div>
   )

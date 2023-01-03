@@ -1,6 +1,7 @@
 import BatchForm from "./BatchForm"
 import { Provider } from "./context"
 import GridForm from "./GridForm"
+import GridPreview from "./GridPreview"
 import Preview from "./Preview"
 
 type Props = {}
@@ -20,7 +21,9 @@ function PrintBatcher({}: Props) {
         <div className="card">
           <Preview />
         </div>
-        <div className="card">GRID PREVIEW</div>
+        <div className="card">
+          <GridPreview />
+        </div>
       </div>
     </div>
   )
