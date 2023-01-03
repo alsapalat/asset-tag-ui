@@ -14,13 +14,13 @@ function PrintBatcher({}: Props) {
           <BatchForm />
         </div>
         <div className="card">
+          <Preview />
+        </div>
+        <div className="card">
           <GridForm />
         </div>
       </div>
       <div className="space-y-4">
-        <div className="card">
-          <Preview />
-        </div>
         <div className="card">
           <GridPreview />
         </div>

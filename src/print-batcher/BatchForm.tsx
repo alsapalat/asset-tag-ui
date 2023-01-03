@@ -61,10 +61,6 @@ function BatchForm({}: Props) {
       <AddVariable onAdd={handleAddValue} label="Add Value" />
 
       <VariableItems onChange={setVariables} value={variables} />
-
-      <button className="bg-slate-500 text-white text-sm whitespace-nowrap px-4 w-full py-3" type="button">
-        Download Individual
-      </button>
     </div>
   )
 }

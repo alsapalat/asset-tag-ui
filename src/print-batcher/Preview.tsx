@@ -58,6 +58,14 @@ function Preview({}: Props) {
   const handleGenerate = async () => {
     const el = document.getElementById('preview-el');
     if (!el) return;
+    const canvas = await html2canvas(el, { allowTaint: false, useCORS: true });
+    const out = canvas.toDataURL();
+    patch({ output: [out] });
+  }
+
+  const handleGenerateBatch = async () => {
+    const el = document.getElementById('preview-el');
+    if (!el) return;
     const output = [];
 
     setIndex(0);
@@ -89,9 +97,12 @@ function Preview({}: Props) {
         <div>{index + 1 } of {values.length}</div>
         <button className="border py-1 border-slate-400 rounded px-3" onClick={handleNext}>Next</button>
       </div>
-      <div>
+      <div className="flex space-x-2">
         <button className="bg-slate-500 text-white text-sm whitespace-nowrap px-4 w-full py-3" type="button" onClick={handleGenerate}>
           Generate
+        </button>
+        <button className="bg-slate-500 text-white text-sm whitespace-nowrap px-4 w-full py-3" type="button" onClick={handleGenerateBatch}>
+          Generate Batch
         </button>
       </div>
     </div>
