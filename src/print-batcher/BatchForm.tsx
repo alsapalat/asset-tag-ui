@@ -1,66 +1,84 @@
 import { useEffect, useState } from 'react'
 import AddVariable from './AddVariable';
-import { useBatchState } from './context';
+import { useBatchSelector, useBatchState } from './context';
+import csvToJson from './csvToJson';
 import { IVariable } from './types';
 import VariableItems from './VariableItems';
 
 type Props = {}
 
 function BatchForm({}: Props) {
-  const [batchFile, setBatchFile] = useState<any>(null);
-  const [bgFile, setBgFile] = useState<any>(null);
+  const [bg, setBg] = useState<string | null>(null);
 
   const [cols, setCols] = useState<Array<string>>([]);
   const [values, setValues] = useState<Array<any>>([]);
 
-  const [variables, setVariables] = useState<IVariable[]>([]);
+  const variables = useBatchSelector<IVariable[]>((v) => v?.variables || []);
+  const { patch } = useBatchState();
+
   const handleUploadBatch = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     const file = target.files?.[0];
-    setBatchFile(file);
-
-    // TODO: TEMP
-    setCols(['QR_VALUE', 'CONTROL_NUMBER'])
-    setValues([
-      { QR_VALUE: 'QR0001', CONTROL_NUMBER: 'C0001' },
-      { QR_VALUE: 'QR0002', CONTROL_NUMBER: 'C0002' },
-      { QR_VALUE: 'QR0003', CONTROL_NUMBER: 'C0003' },
-      { QR_VALUE: 'QR0004', CONTROL_NUMBER: 'C0004' },
-      { QR_VALUE: 'QR0005', CONTROL_NUMBER: 'C0005' },
-      { QR_VALUE: 'QR0006', CONTROL_NUMBER: 'C0006' },
-      { QR_VALUE: 'QR0007', CONTROL_NUMBER: 'C0007' },
-      { QR_VALUE: 'QR0008', CONTROL_NUMBER: 'C0008' },
-      { QR_VALUE: 'QR0009', CONTROL_NUMBER: 'C0009' },
-      { QR_VALUE: 'QR0010', CONTROL_NUMBER: 'C0010' },
-    ])
+    if (!file) return;
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (!reader.result) return
+      const result = reader?.result as string
+      const p = csvToJson(result)
+      setValues(p);
+      setCols(Object.keys(p[0]));
+    }
+    // start reading the file. When it is done, calls the onload event defined above.
+    reader.readAsBinaryString(file)
   }
   const handleUploadBg = ({ target }: React.ChangeEvent<HTMLInputElement>) => {
     const file = target.files?.[0];
-    setBgFile(file);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (!reader.result) return;
+      const result = reader?.result as string
+      setBg(result)
+    }
+    reader.readAsDataURL(file);
   }
   const handleAddQr = (id: string) => {
-    setVariables(variables.concat([{ id, type: 'QR', xPos: 0, yPos: 0, size: 100 }]));
+    patch({ variables: variables.concat([{ id, type: 'QR', xPos: 0, yPos: 0, size: 100 }]) });
   }
   const handleAddValue = (id: string) => {
-    setVariables(variables.concat([{ id, type: 'VALUE', xPos: 0, yPos: 0, size: 12 }]));
+    patch({ variables: variables.concat([{ id, type: 'VALUE', xPos: 0, yPos: 0, size: 12 }]) });
   }
-  const { patch } = useBatchState();
   useEffect(() => {
-    patch({ variables, columns: cols, values });
-  }, [variables, cols, values]);
+    patch({ columns: cols, values, background: bg });
+  }, [cols, values, bg]);
   return (
     <div className="space-y-3">
-      <label className="block text-sm">
+      <label className="block text-sm relative">
         Batch File (*.csv)
         <input className="form-input w-full" type="file" onChange={handleUploadBatch} title="batch file" accept=".csv" />
+        {values.length ? <div className="absolute right-[12px] top-[33px]">
+          <div className="bg-slate-500 text-white font-bold px-3 rounded">
+            {values.length} row/s
+          </div>
+        </div> : null}
       </label>
-      <label className="block text-sm">
-        Upload Background Template (image file)
-        <input className="form-input w-full" type="file" onChange={handleUploadBg} title="batch file" accept="image/*" />
-      </label>
-      <AddVariable onAdd={handleAddQr} label="Add QR" />
-      <AddVariable onAdd={handleAddValue} label="Add Value" />
+      <div className="relative">
+        <label className="block text-sm">
+          Upload Background Template (image file)
+          <input id="input-bg" className="form-input w-full" type="file" onChange={handleUploadBg} title="batch file" accept="image/*" />
+        </label>
+        {bg ? <div className="absolute right-[12px] top-[34px]">
+          <button className="font-bold text-red-600" type="button" onClick={() => {
+            setBg(null);
+            const el = document.getElementById('input-bg') as any;
+            if (!el) return;
+            el.value = "";
+          }}>Clear</button>
+        </div> : null}
+      </div>
+      <AddVariable onAdd={handleAddQr} label="Add QR" disabled={values.length < 1} />
+      <AddVariable onAdd={handleAddValue} label="Add Value" disabled={values.length < 1} />
 
-      <VariableItems onChange={setVariables} value={variables} />
+      <VariableItems onChange={patch} value={variables} />
     </div>
   )
 }

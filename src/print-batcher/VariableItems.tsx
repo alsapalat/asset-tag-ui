@@ -2,16 +2,16 @@ import React from 'react'
 import { IVariable } from './types'
 
 type Props = {
-  onChange: React.Dispatch<React.SetStateAction<IVariable[]>>
+  onChange: any
   value: IVariable[]
 }
 
 function VariableItems({ onChange, value }: Props) {
   const handleChange = (index: number, key: string) => ({ target }: React.ChangeEvent<HTMLInputElement>) => {
-    onChange((state) => state.map((x, i: number) => i === index ? { ...x, [key]: target.value } : x));
+    onChange({ variables: value.map((x, i: number) => i === index ? { ...x, [key]: target.value } : x) });
   }
   const handleRemove = (index: number) => () => {
-    onChange((state) => state.filter((x, i: number) => i !== index));
+    onChange({ variables: value.filter((x, i: number) => i !== index) });
   }
   return (
     <table className="table table-auto w-full border-collapse border border-slate-500">
