@@ -10,3 +10,7 @@
 .table td {
   @apply border border-slate-600;
 }
+
+.btn {
+  @apply bg-slate-500 text-white text-sm whitespace-nowrap px-4 py-3 disabled:opacity-60
+}

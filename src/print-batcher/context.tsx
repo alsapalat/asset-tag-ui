@@ -14,7 +14,7 @@ const useBatchState = () => {
       ...obj
     }))
   }, [setState]);
-  return { patch };
+  return { patch, setState };
 }
 
 function useBatchSelector<T>(selector: (v: any) => T) {

@@ -3,12 +3,14 @@ import { useBatchSelector } from './context';
 
 type Props = {
   onAdd: (v: string) => void,
-  label: string
+  label: string,
+  disabled?: boolean
 }
 
 function AddVariable({
   label,
   onAdd,
+  disabled,
 }: Props) {
   const columns = useBatchSelector<string[]>((x: any) => x?.columns || []);
   const [selected, setSelected] = useState('');
@@ -23,7 +25,7 @@ function AddVariable({
           <option key={item} value={item}>{item}</option>
         ))}
       </select>
-      <button className="bg-slate-500 text-white text-sm whitespace-nowrap px-4" type="button" onClick={handleAdd}>
+      <button className="btn" type="button" onClick={handleAdd} disabled={disabled || !selected}>
         {label}
       </button>
     </div>
