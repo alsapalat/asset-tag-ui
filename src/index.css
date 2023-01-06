@@ -19,9 +19,14 @@
   display: block;
 }
 
+@page {
+  margin: 0;
+}
+
 @media print {
   .print-block {
     break-inside: avoid;
     page-break-inside: avoid;
   }
+
 }
