@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useMemo, useState } from "react";
+import usePersistState from "./usePersistState";
 
 export const BatchContext = React.createContext<any>(null);
 
@@ -24,7 +25,8 @@ function useBatchSelector<T>(selector: (v: any) => T) {
 }
 
 const Provider = ({ children }: IProps) => {
-  const [state, setState] = useState<any>({});
+  // const [state, setState] = useState<any>({});
+  const [state, setState] = usePersistState<any>('temp', {});
   return (
     <BatchContext.Provider value={{ state, setState }}>
       {children}

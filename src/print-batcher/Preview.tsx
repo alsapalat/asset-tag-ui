@@ -102,7 +102,6 @@ const wait = (t: number) => new Promise((r) => setTimeout(r, t));
 function Preview({}: Props) {
   const values = useBatchSelector<Array<any>>((v) => v?.values || []);
   const variables = useBatchSelector<IVariable[]>((v) => v?.variables || []);
-  console.log(variables);
   const bg = useBatchSelector<string>((v) => v?.background);
 
   const [index, setIndex] = useState(0);

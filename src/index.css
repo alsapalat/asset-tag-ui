@@ -14,3 +14,14 @@
 .btn {
   @apply bg-slate-500 text-white text-sm whitespace-nowrap px-4 py-3 disabled:opacity-60
 }
+
+.print-ref {
+  display: block;
+}
+
+@media print {
+  .print-block {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

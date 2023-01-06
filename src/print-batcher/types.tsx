@@ -7,5 +7,8 @@ export interface IVariable {
 }
 
 export interface IGridForm {
+  paper: 'A4' | 'LETTER'
+  columns: number | string
   padding: number | string
+  border: '1' | '0'
 }
