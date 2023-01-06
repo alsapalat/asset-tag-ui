@@ -6,8 +6,8 @@ import { IGridForm } from './types';
 type Props = {}
 
 const MAP_PAPER_CLASS = {
-  A4: "w-[210mm] h-297mm",
-  LETTER: "w-[8.5in] h-[11in]",
+  A4: "print-a4 w-[210mm] h-297mm",
+  LETTER: "print-letter w-[8.5in] h-[11in]",
 }
 
 function GridPreview({}: Props) {
@@ -45,7 +45,7 @@ function GridPreview({}: Props) {
         </div>
       </div>
       <div className="p-5 bg-gray-400 rounded shadow-inner mt-3 overflow-auto">
-        <div ref={printRef} className="bg-white table">
+        <div ref={printRef} className={`bg-white table ${MAP_PAPER_CLASS[form.paper]}`}>
           {output.length < 1 ? (
             <div>
               No preview.

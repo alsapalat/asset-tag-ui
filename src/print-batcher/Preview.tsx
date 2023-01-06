@@ -17,9 +17,17 @@ function DragDiv({ children, top, left, onDragMoveEnd, ...props }: IDragDiv) {
   const isDrag = useRef<boolean>(false);
   const coordStart = useRef<any>({ top: 0, left: 0 });
   const [style, setStyle] = useState({ top, left }) ;
+  const handleDragEnd = () => {
+    isDrag.current = false
+    const el = myRef.current;
+    onDragMoveEnd({
+      top: +el.offsetTop,
+      left: +el.offsetLeft,
+    })
+  }
   return (
     <div
-      className="absolute z-10 block bg-transparent"
+      className="absolute z-10 block bg-transparent cursor-grab"
       {...props}
       style={style}
       ref={myRef}
@@ -42,14 +50,8 @@ function DragDiv({ children, top, left, onDragMoveEnd, ...props }: IDragDiv) {
           left: +coord.left
         }));
       }}
-      onMouseUp={() => {
-        isDrag.current = false
-        const el = myRef.current;
-        onDragMoveEnd({
-          top: +el.offsetTop,
-          left: +el.offsetLeft,
-        })
-      }}
+      onMouseLeave={handleDragEnd}
+      onMouseUp={handleDragEnd}
     >
       {children}
     </div>
@@ -92,7 +94,7 @@ function VariableValue({ data, value, index }: { data: IVariable, value: any, in
   }
   return (
     <DragDiv key={`${data.xPos}${data.yPos}`} top={data.yPos} left={data.xPos} onDragMoveEnd={handleDragEnd}>
-      <span className="font-bold" style={{ fontSize: `${data.size}px` }}>{value?.[data.id] || '- NOT FOUND -'}</span>
+      <span className="font-bold font-mono" style={{ fontSize: `${data.size}px` }}>{value?.[data.id] || '- NOT FOUND -'}</span>
     </DragDiv>
   )
 }
@@ -118,6 +120,8 @@ function Preview({}: Props) {
 
   const { patch } = useBatchState();
 
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const handleGenerate = async () => {
     const el = document.getElementById('preview-el');
     if (!el) return;
@@ -131,6 +135,7 @@ function Preview({}: Props) {
     if (!el) return;
     const output = [];
 
+    setIsGenerating(true);
     setIndex(0);
     await wait(10);
 
@@ -141,36 +146,46 @@ function Preview({}: Props) {
       output.push(canvas.toDataURL());
     }
     patch({ output });
+    setIsGenerating(false);
   }
 
   return (
-    <div className="space-y-2">
-      <div className="border border-black">
-        <div id="preview-el" className="relative">
-          {bg
-            ? <img className="w-full" src={bg} title="bg preview" />
-            : <div className="py-12 text-center text-slate-500 text-sm italic"> Please upload background first</div>}
-          {React.Children.toArray((variables).map((item, i) => {
-            if (item.type === 'QR') return <VariableQr data={item} value={data} index={i} />
-            if (item.type === 'VALUE') return <VariableValue data={item} value={data} index={i} />
-            return null;
-          }))}
+    <>
+      <div className="space-y-2">
+        <div className="border border-black">
+          <div id="preview-el" className="relative">
+            {bg
+              ? <img className="w-full" src={bg} title="bg preview" />
+              : <div className="py-12 text-center text-slate-500 text-sm italic"> Please upload background first</div>}
+            {React.Children.toArray((variables).map((item, i) => {
+              if (item.type === 'QR') return <VariableQr data={item} value={data} index={i} />
+              if (item.type === 'VALUE') return <VariableValue data={item} value={data} index={i} />
+              return null;
+            }))}
+          </div>
+        </div>
+        {values.length ? <div className="flex justify-between items-center">
+          <button className="border py-1 border-slate-400 rounded px-3" onClick={handlePrev}>Prev</button>
+          <div>{index + 1 } of {values.length}</div>
+          <button className="border py-1 border-slate-400 rounded px-3" onClick={handleNext}>Next</button>
+        </div> : null}
+        <div className="flex space-x-2">
+          <button className="btn w-full" type="button" onClick={handleGenerate} disabled={values.length < 1}>
+            Generate
+          </button>
+          <button className="btn w-full" type="button" onClick={handleGenerateBatch} disabled={values.length < 1}>
+            Generate Batch
+          </button>
         </div>
       </div>
-      {values.length ? <div className="flex justify-between items-center">
-        <button className="border py-1 border-slate-400 rounded px-3" onClick={handlePrev}>Prev</button>
-        <div>{index + 1 } of {values.length}</div>
-        <button className="border py-1 border-slate-400 rounded px-3" onClick={handleNext}>Next</button>
-      </div> : null}
-      <div className="flex space-x-2">
-        <button className="btn w-full" type="button" onClick={handleGenerate} disabled={values.length < 1}>
-          Generate
-        </button>
-        <button className="btn w-full" type="button" onClick={handleGenerateBatch} disabled={values.length < 1}>
-          Generate Batch
-        </button>
-      </div>
-    </div>
+      {isGenerating ? (
+        <div className="fixed h-full w-full inset-0 flex items-center justify-center bg-white/20 backdrop-blur-sm z-50">
+          <div className="font-black">
+            Generating({index + 1} of {values.length}) Please wait....
+          </div>
+        </div>
+      ): null}
+    </>
   )
 }
 
