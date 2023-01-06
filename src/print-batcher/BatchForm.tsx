@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AddVariable from './AddVariable';
 import { useBatchSelector, useBatchState } from './context';
 import csvToJson from './csvToJson';
@@ -48,6 +48,7 @@ function BatchForm({}: Props) {
     patch({ variables: variables.concat([{ id, type: 'VALUE', xPos: 0, yPos: 0, size: 12 }]) });
   }
   useEffect(() => {
+    if (true) return;
     patch({ columns: cols, values, background: bg });
   }, [cols, values, bg]);
   return (
